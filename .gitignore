@@ -122,3 +122,12 @@ figs/*
 # Exceptions
 # !tests/coupled/multibody/floating_wind_turbine/oc3_cs_v07.floating.h5 
 !tests/coupled/multibody/floating_wind_turbine/oc3_cs_v07.floating.h*
+
+#weird github bug
+CONTRIBUTING.md
+docs/JOSS/generate.rb
+docs/source/content/example_notebooks/source/type04_db_nrel5mw_oc3_v06.xlsx
+scripts/optimiser/optimiser.py
+tests/coupled/multibody/floating_wind_turbine/oc3_cs_v07.floating.h5
+tests/coupled/multibody/floating_wind_turbine/test_floating_wind_turbine.py
+tests/uvlm/dynamic/test_wake_cfl_n1.py
