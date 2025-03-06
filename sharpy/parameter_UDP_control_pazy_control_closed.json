@@ -1,0 +1,1 @@
+{"server_ip_addr": "127.0.0.1", "client_ip_addr": "127.0.0.1", "port_in_network": 64017, "port_out_network_server": 59017, "port_out_network_client": 59007, "output_folder": "/home/user/sharpy/sharpy/output", "dt": 0.0001838235294117647, "simulation_time": 2.0, "num_sensors": 1, "initial_cs_deflection": 0, "reference_deflection": 0.5562989}
