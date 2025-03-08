@@ -49,6 +49,8 @@ function [success] = control_design_script(route_directory)
     simIn = setVariable(simIn,'P_gain',0);
     simIn = setVariable(simIn,'I_gain',0);
     simIn = setVariable(simIn,'state_space_system',state_space_system);
+    simIn = setVariable(simIn,'x0',x0) %now you need to generate an x0 which is the deflected condition, 
+    %%suspect that this can be loaded from /savedata/'case_name'.data.h5 but need to know what parts of x to populate
     simIn = setVariable(simIn,'input_settings',input_settings);
     simIn = setVariable(simIn,'gust', gust);
     %% Run Simulink with PID Controller    
