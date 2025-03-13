@@ -62,6 +62,10 @@ class ControlSurfacePidController(controller_interface.BaseController):
             'Write a time history of input, required input, ' +
             'and control')
     
+    settings_types['N'] = 'int'
+    settings_description['N'] = (
+        'Number of spanwise nodes')
+    
     supported_input_types = ['pitch', 'roll', 'pos_', 'tip_pos']
 
     settings_table = settings.SettingsTable()
@@ -221,7 +225,7 @@ class ControlSurfacePidController(controller_interface.BaseController):
             output = pos[2]
         elif self.settings['input_type'] == 'tip_pos':
             step = controlled_state['structural']
-            pos = step.pos[32//2, :]
+            pos = step.pos[self.settings['N']//2, :]
 
             output = pos[2]
         else:
