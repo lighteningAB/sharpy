@@ -61,8 +61,8 @@ class ControlSurfacePidController(controller_interface.BaseController):
     settings_description['write_controller_log'] = (
             'Write a time history of input, required input, ' +
             'and control')
-
-    supported_input_types = ['pitch', 'roll', 'pos_']
+    
+    supported_input_types = ['pitch', 'roll', 'pos_', 'tip_pos']
 
     settings_table = settings.SettingsTable()
     __doc__ += settings_table.generate(settings_types,
@@ -217,6 +217,11 @@ class ControlSurfacePidController(controller_interface.BaseController):
             node = int(node_str)
             step = controlled_state['structural']
             pos = step.pos[node, :]
+
+            output = pos[2]
+        elif self.settings['input_type'] == 'tip_pos':
+            step = controlled_state['structural']
+            pos = step.pos[32//2, :]
 
             output = pos[2]
         else:
