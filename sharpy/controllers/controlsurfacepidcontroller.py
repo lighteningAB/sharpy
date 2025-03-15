@@ -63,6 +63,7 @@ class ControlSurfacePidController(controller_interface.BaseController):
             'and control')
     
     settings_types['N'] = 'int'
+    settings_default['N'] = 0  # Add a default value
     settings_description['N'] = (
         'Number of spanwise nodes')
     
