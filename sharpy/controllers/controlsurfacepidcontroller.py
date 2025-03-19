@@ -78,6 +78,7 @@ class ControlSurfacePidController(controller_interface.BaseController):
         self.in_dict = None
         self.data = None
         self.settings = None
+        self.prev_control_command = 0.0  # Store the previous control command
 
         self.prescribed_input_time_history = None
 
@@ -187,6 +188,18 @@ class ControlSurfacePidController(controller_interface.BaseController):
                                'I': self.settings['I'],
                                'D': self.settings['D']},
                 i_current=i_current)
+        
+        # Apply rate limiting: max change is 1 radian per 0.1s => 10 rad/s
+        max_rate = 10.0  # radians per second
+        dt = self.settings['dt']
+
+        max_change = max_rate * dt
+        control_command = np.clip(control_command,
+                                  self.prev_control_command - max_change,
+                                  self.prev_control_command + max_change)
+
+        # Store the new control command
+        self.prev_control_command = control_command
 
         controlled_state['aero'].control_surface_deflection = (
             np.array(self.settings['controlled_surfaces_coeff'])*control_command)
