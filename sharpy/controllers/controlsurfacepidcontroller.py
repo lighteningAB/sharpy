@@ -239,9 +239,19 @@ class ControlSurfacePidController(controller_interface.BaseController):
             output = pos[2]
         elif self.settings['input_type'] == 'tip_pos':
             step = controlled_state['structural']
-            pos = step.pos[self.settings['N']//2, :]
-
-            output = pos[2]
+            current_pos = step.pos[self.settings['N']//2, :]
+            
+            # Calculate velocity using the difference in position
+            if hasattr(self, 'last_tip_pos'):
+                previous_pos = self.last_tip_pos
+                dt = self.settings['dt']
+                velocity = (current_pos[2] - previous_pos) / dt
+            else:
+                velocity = 0.0  # Assume zero velocity for the first step
+            
+            # Store the current position for future velocity calculation
+            self.last_tip_pos = current_pos[2]
+            output = velocity
         else:
             raise NotImplementedError(
                 "input_type {} is not yet implemented in extract_time_history()"
