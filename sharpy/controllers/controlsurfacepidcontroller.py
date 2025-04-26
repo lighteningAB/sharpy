@@ -240,17 +240,27 @@ class ControlSurfacePidController(controller_interface.BaseController):
         elif self.settings['input_type'] == 'tip_pos':
             step = controlled_state['structural']
             current_pos = step.pos[self.settings['N']//2, :]
-            
-            # Calculate velocity using the difference in position
-            if hasattr(self, 'last_tip_pos'):
-                previous_pos = self.last_tip_pos
-                dt = self.settings['dt']
-                velocity = (current_pos[2] - previous_pos) / dt
+            current_time = len(self.real_state_input_history) * self.settings['dt']
+
+            # Initialize storage for the last 10 data points
+            if not hasattr(self, 'tip_pos_history'):
+                self.tip_pos_history = []
+
+            # Add the current position and time to the history
+            self.tip_pos_history.append((current_time, current_pos[2]))
+
+            # Keep only the last 10 data points
+            if len(self.tip_pos_history) > 10:
+                self.tip_pos_history.pop(0)
+
+            # Calculate velocity using linear interpolation if we have enough points
+            if len(self.tip_pos_history) > 1:
+                times, positions = zip(*self.tip_pos_history)
+                # Perform a linear fit to calculate the slope (velocity)
+                velocity = np.polyfit(times, positions, 1)[0]
             else:
-                velocity = 0.0  # Assume zero velocity for the first step
-            
-            # Store the current position for future velocity calculation
-            self.last_tip_pos = current_pos[2]
+                velocity = 0.0  # Assume zero velocity if insufficient data points
+
             output = velocity
         else:
             raise NotImplementedError(
