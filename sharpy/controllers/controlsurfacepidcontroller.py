@@ -1,5 +1,6 @@
 import numpy as np
 import os
+from collections import deque
 
 import sharpy.utils.controller_interface as controller_interface
 import sharpy.utils.settings as settings
@@ -242,15 +243,15 @@ class ControlSurfacePidController(controller_interface.BaseController):
             current_pos = step.pos[self.settings['N']//2, :]
             current_time = len(self.real_state_input_history) * self.settings['dt']
 
-            # Initialize storage for the last 10 data points
+            # Initialize storage for the last 100 data points
             if not hasattr(self, 'tip_pos_history'):
                 self.tip_pos_history = []
 
             # Add the current position and time to the history
             self.tip_pos_history.append((current_time, current_pos[2]))
 
-            # Keep only the last 10 data points
-            if len(self.tip_pos_history) > 10:
+            # Keep only the last 100 data points
+            if len(self.tip_pos_history) > 100:
                 self.tip_pos_history.pop(0)
 
             # Calculate velocity using linear interpolation if we have enough points
@@ -258,15 +259,28 @@ class ControlSurfacePidController(controller_interface.BaseController):
                 times, positions = zip(*self.tip_pos_history)
                 # Perform a linear fit to calculate the slope (velocity)
                 velocity = np.polyfit(times, positions, 1)[0]
+
+                # Apply a low-pass filter to smooth the velocity
+                if not hasattr(self, 'velocity_history'):
+                    self.velocity_history = deque(maxlen=2500)
+
+                self.velocity_history.append(velocity)
+
+                # Apply low-pass filter if we have enough velocity data points
+                if len(self.velocity_history) > 100:  # Ensure enough points for filtering
+                    filtered_velocity = self.low_pass_filter(list(self.velocity_history), cutoff=20, fs=1/self.settings['dt'])
+                    velocity = filtered_velocity[-1]  # Use the most recent filtered value
             else:
                 velocity = 0.0  # Assume zero velocity if insufficient data points
 
             output = velocity
-        else:
-            raise NotImplementedError(
-                "input_type {} is not yet implemented in extract_time_history()"
-                .format(self.settings['input_type']))
-        return output
+
+    def low_pass_filter(self, data, cutoff, fs, order=4):
+        from scipy.signal import butter, filtfilt
+        nyquist = 0.5 * fs
+        normal_cutoff = cutoff / nyquist
+        b, a = butter(order, normal_cutoff, btype='low', analog=False)
+        return filtfilt(b, a, data)
 
     def controller_wrapper(self,
                            required_input,
