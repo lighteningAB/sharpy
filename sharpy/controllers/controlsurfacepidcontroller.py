@@ -274,6 +274,11 @@ class ControlSurfacePidController(controller_interface.BaseController):
                 velocity = 0.0  # Assume zero velocity if insufficient data points
 
             output = velocity
+        else:
+            raise NotImplementedError(
+                "input_type {} is not yet implemented in extract_time_history()"
+                .format(self.settings['input_type']))
+        return output
 
     def low_pass_filter(self, data, cutoff, fs, order=4):
         from scipy.signal import butter, filtfilt
