@@ -199,8 +199,12 @@ class ControlSurfacePidController(controller_interface.BaseController):
                                   self.prev_control_command - max_change,
                                   self.prev_control_command + max_change)
 
+        # Cap the deflection between -0.2 and 0.2
+        control_command = np.clip(control_command, -0.2, 0.2)
+
         # Store the new control command
         self.prev_control_command = control_command
+
 
         controlled_state['aero'].control_surface_deflection = (
             np.array(self.settings['controlled_surfaces_coeff'])*control_command)
@@ -243,15 +247,15 @@ class ControlSurfacePidController(controller_interface.BaseController):
             current_pos = step.pos[self.settings['N']//2, :]
             current_time = len(self.real_state_input_history) * self.settings['dt']
 
-            # Initialize storage for the last 100 data points
+            # Initialize storage for the last 5 data points
             if not hasattr(self, 'tip_pos_history'):
                 self.tip_pos_history = []
 
             # Add the current position and time to the history
             self.tip_pos_history.append((current_time, current_pos[2]))
 
-            # Keep only the last 100 data points
-            if len(self.tip_pos_history) > 100:
+            # Keep only the last 5 data points
+            if len(self.tip_pos_history) > 5:
                 self.tip_pos_history.pop(0)
 
             # Calculate velocity using linear interpolation if we have enough points
@@ -267,7 +271,7 @@ class ControlSurfacePidController(controller_interface.BaseController):
                 self.velocity_history.append(velocity)
 
                 # Apply low-pass filter if we have enough velocity data points
-                if len(self.velocity_history) > 100:  # Ensure enough points for filtering
+                if len(self.velocity_history) > 5:  # Ensure enough points for filtering
                     filtered_velocity = self.low_pass_filter(list(self.velocity_history), cutoff=20, fs=1/self.settings['dt'])
                     velocity = filtered_velocity[-1]  # Use the most recent filtered value
             else:
