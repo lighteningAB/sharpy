@@ -284,7 +284,7 @@ class ControlSurfacePidController(controller_interface.BaseController):
                 .format(self.settings['input_type']))
         return output
 
-    def low_pass_filter(self, data, cutoff, fs, order=4):
+    def low_pass_filter(self, data, cutoff, fs, order=2):
         from scipy.signal import butter, filtfilt
         nyquist = 0.5 * fs
         normal_cutoff = cutoff / nyquist
