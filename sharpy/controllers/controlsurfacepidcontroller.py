@@ -271,7 +271,7 @@ class ControlSurfacePidController(controller_interface.BaseController):
                 self.velocity_history.append(velocity)
 
                 # Apply low-pass filter if we have enough velocity data points
-                if len(self.velocity_history) > 5:  # Ensure enough points for filtering
+                if len(self.velocity_history) > 9:  # Ensure enough points for filtering
                     filtered_velocity = self.low_pass_filter(list(self.velocity_history), cutoff=20, fs=1/self.settings['dt'])
                     velocity = filtered_velocity[-1]  # Use the most recent filtered value
             else:
